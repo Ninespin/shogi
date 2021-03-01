@@ -1,15 +1,15 @@
-from Piece import *
-from Owner import *
-from Move import *
+from .Piece import *
 
 
-class Pawn(Piece):
-    def __init__(self, owner: Owner, x: int = 0, y: int = 0):
-        super().__init__(owner, x, y)
+class Lance(Piece):
+    def __init__(self, owner: Owner, board: Board, x: int = 0, y: int = 0):
+        super().__init__(owner, board, x, y)
         self.can_promote = True
 
     def get_normal_move_set(self):
-        return [Move(self.x, self.y+1*get_owner_direction_mult(self.owner))]
+        dir = get_owner_direction_mult(self.owner)
+        moves = self.board.get_moves_in_direction(self, 0, dir)
+        return moves
 
     def get_promoted_move_set(self):
         dir = get_owner_direction_mult(self.owner)
@@ -23,6 +23,5 @@ class Pawn(Piece):
                 Move(self.x, one_bck)]
 
     def __str__(self):
-        s = ("+p" if self.promoted else " p")
-        s = s.upper() if self.owner is Owner.GOTE else s
+        s = ("+l" if self.promoted else " l")
         return s
