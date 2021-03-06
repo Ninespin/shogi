@@ -1,4 +1,5 @@
 import Board
+import re
 from Config import *
 from Pieces import *
 
@@ -39,4 +40,24 @@ fen = "l+n1g5/1r2S1k2/p2pppn2/2ps2p2/1p7/2P6/PPSPPPPLP/2G2K1pr/+LN4+G1b w BGSLPn
 print("loading SFEN: {}".format(fen))
 board.from_fen(fen)
 print_board(board)
+
+
+while True:
+    value = input("{}'s next move: ".format(board.current_player.name))
+    if re.match("^exit", value):
+        break;
+    elif re.match("^help|h|\?", value):
+        print("exit - exits the game")
+        print("help - shows help")
+        print("move format: <PIECE><ORIGIN><MOVEMENT><DESTINATION><(PROMOTION)>")
+    else:
+        match = re.match("^(?P<piece>\+{0,1}[PpNnLlSsBbRrKkGg])(?P<origin>[0-8]{2})(?P<move>[x\-*'])(?P<destination>[0-8]{2})(?P<promotion>\+|\=|$)", value)
+        if match:
+            print("""
+piece: {}
+origin: {}
+move: {}
+destination: {}
+promote: {}
+""".format(match.group('piece'), match.group('origin'),match.group('move'),match.group('destination'),match.group('promotion')))
 
