@@ -7,4 +7,4 @@ class Owner(Enum):
 
 
 def get_owner_direction_mult(owner: Owner) -> int:
-    return -1 if owner is Owner.GOTE else 1
+    return -1 if owner is Owner.SENTE else 1

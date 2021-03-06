@@ -1,5 +1,5 @@
 from Config import *
-from Pieces import Piece
+from Pieces import *
 from Owner import *
 from Move import *
 
@@ -12,8 +12,73 @@ class Board:
         self.sentepromotion = self.sizey-self.promotezone
         self.gotepromotion = self.promotezone
         self.data: list[list[Piece]] = [[None for i in range(self.sizex)] for j in range(self.sizey)]
-        self.gotesideboard: list[Piece] = []
-        self.sentesideboard: list[Piece] = []
+        self.gote_sideboard: list[Piece] = []
+        self.sente_sideboard: list[Piece] = []
+        self.current_player: Owner = Owner.SENTE
+
+    def from_fen(self, fen: str):
+        self.clear()
+        piece_factory: PieceFactory = PieceFactory()
+        parts = fen.split()
+        # board state
+        lines = parts[0].split('/')
+        for row, line in enumerate(lines):
+            current_piece = ""
+            piece_complete = False
+            previous_is_skip = False
+            column = 0
+            if line.isnumeric():
+                column += int(line)
+            else:
+                for i in range(len(line)):
+                    if line[i] == "+":
+                        if previous_is_skip:
+                            column += int(current_piece)
+                            previous_is_skip = False
+                            current_piece = ""
+                        current_piece += line[i]
+                    elif piece_factory.is_known_fen(line[i]):
+                        if previous_is_skip:
+                            column += int(current_piece)
+                            previous_is_skip = False
+                            current_piece = ""
+                        current_piece += line[i]
+                        piece_complete = True
+                    elif line[i].isnumeric():
+                        current_piece += line[i]
+                        previous_is_skip = True
+
+                    if piece_complete:
+                        piece: Piece = piece_factory.make_piece_from_fen(current_piece, self)
+                        self.set_piece(self.sizex - column - 1, row, piece)
+                        current_piece = ""
+                        piece_complete = False
+                        column += 1
+
+        # current player
+        if len(parts) > 1:
+            if parts[1] == "w":
+                self.current_player = Owner.GOTE
+            elif parts[1] == "b":
+                self.current_player = Owner.SENTE
+        # sideboards
+        if len(parts) > 2:
+            hands = parts[2]
+            for i, p in enumerate(hands):
+                piece: Piece = piece_factory.make_piece_from_fen(p, self, -1, -1)
+                if piece is not None:
+                    if piece.owner is Owner.GOTE:
+                        self.gote_sideboard.append(piece)
+                    elif piece.owner is Owner.SENTE:
+                        self.sente_sideboard.append(piece)
+
+
+
+
+    def clear(self):
+        self.data: list[list[Piece]] = [[None for i in range(self.sizex)] for j in range(self.sizey)]
+        self.gote_sideboard: list[Piece] = []
+        self.sente_sideboard: list[Piece] = []
 
     def get_piece(self, x: int, y: int) -> Piece:
         return self.data[y][x]
@@ -73,9 +138,9 @@ class Board:
 
     def capture(self, capturer: Piece, captured: Piece):
         if capturer.owner is Owner.GOTE:
-            self.gotesideboard.append(captured)
+            self.gote_sideboard.append(captured)
         elif capturer.owner is Owner.SENTE:
-            self.sentesideboard.append(captured)
+            self.sente_sideboard.append(captured)
 
     def place_piece(self, piece: Piece, move: Move, promote: bool = False):
         piece_at_pos = self.get_piece(move.x, move.y)
@@ -110,7 +175,16 @@ class Board:
         for j in range(self.sizey):
             for i in reversed(range(self.sizex)):
                 piece = self.get_piece(i, j)
-                piece_str = ((str(piece).upper() if piece.owner is Owner.GOTE else str(piece))+" ") if piece is not None else " . "
+                piece_str = ((str(piece).upper() if piece.owner is Owner.SENTE else str(piece))+" ") if piece is not None else " . "
                 s += piece_str
-            s += " {}\n".format(j+1)
+            s += " {}{}".format(j+1, '\n' if j < self.sizey - 1 else '')
         return s
+
+    def get_sideboard_str(self, owner: Owner):
+        sideboard = self.sente_sideboard if owner is Owner.SENTE else self.gote_sideboard
+        s = "[" + (" " if len(sideboard) == 0 else "")
+        for piece in sideboard:
+            s += (str(piece).upper() if piece.owner is Owner.SENTE else str(piece)) + " "
+        s += "]"
+        return s
+

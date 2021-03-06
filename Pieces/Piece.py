@@ -51,3 +51,7 @@ class Piece:
 
     def __str__(self):
         return "??"
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "?"

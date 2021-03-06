@@ -25,3 +25,7 @@ class Lance(Piece):
     def __str__(self):
         s = ("+l" if self.promoted else " l")
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "l"

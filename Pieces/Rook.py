@@ -31,3 +31,7 @@ class Rook(Piece):
     def __str__(self):
         s = ("+r" if self.promoted else " r")
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "r"

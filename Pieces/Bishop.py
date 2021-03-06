@@ -31,3 +31,7 @@ class Bishop(Piece):
     def __str__(self):
         s = ("+b" if self.promoted else " b")
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "b"

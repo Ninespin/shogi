@@ -28,3 +28,7 @@ class Knight(Piece):
     def __str__(self):
         s = ("+n" if self.promoted else " n")
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "n"

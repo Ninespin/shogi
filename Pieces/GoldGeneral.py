@@ -23,3 +23,7 @@ class GoldGeneral(Piece):
     def __str__(self):
         s = " g"
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "g"

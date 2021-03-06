@@ -26,3 +26,7 @@ class King(Piece):
     def __str__(self):
         s = " k"
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "k"

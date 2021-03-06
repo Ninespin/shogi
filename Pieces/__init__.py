@@ -7,3 +7,4 @@ from .King import *
 from .Lance import *
 from .Rook import *
 from .Bishop import *
+from .PieceFactory import *

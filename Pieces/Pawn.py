@@ -23,3 +23,7 @@ class Pawn(Piece):
     def __str__(self):
         s = ("+p" if self.promoted else " p")
         return s
+
+    @staticmethod
+    def __generic_fen_repr__():
+        return "p"
