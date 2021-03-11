@@ -21,7 +21,7 @@ class GoldGeneral(Piece):
         return []
 
     def __str__(self):
-        s = " g"
+        s = "g"
         return s
 
     @staticmethod

@@ -26,7 +26,7 @@ class Knight(Piece):
                 Move(self.x, one_bck)]
 
     def __str__(self):
-        s = ("+n" if self.promoted else " n")
+        s = ("+n" if self.promoted else "n")
         return s
 
     @staticmethod

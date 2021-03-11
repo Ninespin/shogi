@@ -72,9 +72,6 @@ class Board:
                     elif piece.owner is Owner.SENTE:
                         self.sente_sideboard.append(piece)
 
-
-
-
     def clear(self):
         self.data: list[list[Piece]] = [[None for i in range(self.sizex)] for j in range(self.sizey)]
         self.gote_sideboard: list[Piece] = []
@@ -84,6 +81,9 @@ class Board:
         return self.data[y][x]
 
     def set_piece(self, x: int, y: int, piece: Piece):
+        if piece is not None:
+            piece.x = x
+            piece.y = y
         self.data[y][x] = piece
 
     def try_promote_piece_at(self, x: int, y: int):
@@ -102,7 +102,7 @@ class Board:
         return self.is_move_in_board_and_not_on_ally(piece, move) and piece.can_move(move.x, move.y)
 
     def is_move_in_board_and_not_on_ally(self, piece: Piece, move: Move) -> bool:
-        if (0 <= move.x < self.sizex) and (0 <= move.y < self.sizey):
+        if (0 <= move.x < self.sizex) and (0 <= move.y < self.sizey) and piece is not None:
             piece_at_pos = self.get_piece(move.x, move.y)
             return piece_at_pos is None or piece_at_pos.owner is not piece.owner
         return False
@@ -153,12 +153,14 @@ class Board:
 
     def move_piece(self, piece: Piece, move: Move, enable_promotion: bool = True):
         piece_at_pos = self.get_piece(move.x, move.y)
+        if move not in self.filter_valid_moves(piece, enable_promotion):
+            move.promote = False
         if piece_at_pos is not None and piece_at_pos.owner is not piece.owner:
             self.capture(piece, piece_at_pos)
-        self.set_piece(move.x, move.y, piece)
         self.set_piece(piece.x, piece.y, None)
+        self.set_piece(move.x, move.y, piece)
         piece.move(move)
-        if enable_promotion and not self.filter_valid_moves(piece): #dont suggest promotion
+        if enable_promotion and not self.filter_valid_moves(piece): #cant move and enable promote
             piece.promote()
 
     def try_move(self, piece: Piece, move: Move, enable_promotion: bool = True) -> bool:
@@ -167,18 +169,51 @@ class Board:
             self.move_piece(piece, move, enable_promotion)
         return can_move
 
-    def __str__(self):
-        s = ""
-        for i in reversed(range(self.sizex)):
-            s += " {} ".format(i+1)
-        s += "\n"
-        for j in range(self.sizey):
-            for i in reversed(range(self.sizex)):
-                piece = self.get_piece(i, j)
-                piece_str = ((str(piece).upper() if piece.owner is Owner.SENTE else str(piece))+" ") if piece is not None else " . "
-                s += piece_str
-            s += " {}{}".format(j+1, '\n' if j < self.sizey - 1 else '')
-        return s
+    def drop(self, piece: Piece, x: int, y: int):
+        if piece.owner == Owner.SENTE:
+            sideboard = self.sente_sideboard
+        else:
+            sideboard = self.gote_sideboard
+        good_to_drop = False
+        if 0 <= x < self.sizex and 0 <= y < self.sizey:
+            piece_at_dest = self.get_piece(x, y)
+            if piece_at_dest is None and piece in sideboard:
+                if isinstance(piece, Pawn): # pawn drop special rule
+                    for j in range(self.sizey):
+                        ptarg = self.get_piece(x, j)
+                        good_to_drop = not (isinstance(ptarg, Pawn) and piece.owner == ptarg.owner and not ptarg.promoted)
+                        if not good_to_drop:
+                            break
+                else:
+                    good_to_drop = True
+                if good_to_drop:
+                    sideboard.remove(piece)
+                    self.place_piece(piece, Move(x, y))
+        return good_to_drop
+
+    def get_fen_of_piece(self, piece: Piece):
+        return ((str(piece).upper() if piece.owner is Owner.SENTE else str(
+            piece))) if piece is not None else "."
+
+    def get_fen_of_piece_at_pos(self, x: int, y: int):
+        return self.get_fen_of_piece(self.get_piece(x, y))
+
+    def is_in_sideboard(self, piece: Piece):
+        if piece.owner == Owner.GOTE:
+            sideboard = self.gote_sideboard
+        else:
+            sideboard = self.sente_sideboard
+        return piece in sideboard
+
+    def get_from_sideboard(self, sfen: str):
+        if sfen.isupper():
+            sideboard = self.sente_sideboard
+        else:
+            sideboard = self.gote_sideboard
+        for piece in sideboard:
+            if self.get_fen_of_piece(piece) == sfen:
+                return piece
+        return None
 
     def get_sideboard_str(self, owner: Owner):
         sideboard = self.sente_sideboard if owner is Owner.SENTE else self.gote_sideboard
@@ -188,3 +223,16 @@ class Board:
         s += "]"
         return s
 
+    def __str__(self):
+        s = ""
+        for i in reversed(range(self.sizex)):
+            s += " {} ".format(i+1)
+        s += "\n"
+        for j in range(self.sizey):
+            for i in reversed(range(self.sizex)):
+                piece = self.get_piece(i, j)
+                piece_str = ((str(piece).upper() if piece.owner is Owner.SENTE else str(
+                        piece))) if piece is not None else "."
+                s += (" " if (piece is None or not piece.promoted) else "") + piece_str + " "
+            s += " {}{}".format(j+1, '\n' if j < self.sizey - 1 else '')
+        return s

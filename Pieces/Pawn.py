@@ -21,7 +21,7 @@ class Pawn(Piece):
                 Move(self.x, one_bck)]
 
     def __str__(self):
-        s = ("+p" if self.promoted else " p")
+        s = ("+p" if self.promoted else "p")
         return s
 
     @staticmethod

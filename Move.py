@@ -5,3 +5,6 @@ class Move:
         self.y = y
         self.promote = promote
         self.demote = demote
+
+    def __str__(self):
+        return "({}, {}, promote: {})".format(self.x,self.y, self.promote)

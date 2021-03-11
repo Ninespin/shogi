@@ -28,7 +28,7 @@ class SilverGeneral(Piece):
                 Move(self.x, one_bck)]
 
     def __str__(self):
-        s = ("+s" if self.promoted else " s")
+        s = ("+s" if self.promoted else "s")
         return s
 
     @staticmethod

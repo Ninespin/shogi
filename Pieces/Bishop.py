@@ -29,7 +29,7 @@ class Bishop(Piece):
         return moves
 
     def __str__(self):
-        s = ("+b" if self.promoted else " b")
+        s = ("+b" if self.promoted else "b")
         return s
 
     @staticmethod

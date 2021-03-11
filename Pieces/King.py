@@ -24,7 +24,7 @@ class King(Piece):
         return []
 
     def __str__(self):
-        s = " k"
+        s = "k"
         return s
 
     @staticmethod

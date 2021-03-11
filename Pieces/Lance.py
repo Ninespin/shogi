@@ -23,7 +23,7 @@ class Lance(Piece):
                 Move(self.x, one_bck)]
 
     def __str__(self):
-        s = ("+l" if self.promoted else " l")
+        s = ("+l" if self.promoted else "l")
         return s
 
     @staticmethod

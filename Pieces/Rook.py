@@ -29,7 +29,7 @@ class Rook(Piece):
         return moves
 
     def __str__(self):
-        s = ("+r" if self.promoted else " r")
+        s = ("+r" if self.promoted else "r")
         return s
 
     @staticmethod
